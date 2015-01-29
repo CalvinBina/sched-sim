@@ -16,23 +16,26 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <time.h>
 #include "mt19937ar.h"
+
+#define NUM_TASK_TYPES 8
+
+struct config {
+    float freqs[NUM_TASK_TYPES];
+};
 
 // This will check if there exists a data.txt in the 
 // current directory, deleting it if it exists
 //
-int fileCheck()
+int fileCheck(char str[])
 {
     FILE *fp;
-    if (fp = fopen("data.txt", "r"))
+    if (fp = fopen(str, "r"))
     {
         fclose(fp);
-        int rc;
-        rc = remove("data.txt");
-        if (rc == 1)
-        {
-            puts("ERROR: Unable to delete old test data file.");
-            exit(0);
+        if (strcmp(str, "data.txt") == 0) {
+            remove("data.txt");
         }
         return 1;
     }
@@ -110,14 +113,70 @@ int generateData(FILE * fp, int numtasks)
     return 0;
 }
 
+// Creates a default config if a config file DNE
+int createDefConfig()
+{
+    FILE *fp;
+    fp = fopen("config.cfg", "w");
+    int i;
+    for (i=0; i<8; i++) {
+        fprintf(fp, "%d 12.5\n", i+1);
+    }
+    fclose(fp);
+    return 0;
+}
+
+int loadConfig(struct config * s) {
+    FILE *fp;
+    fp = fopen("config.cfg", "r");
+    int i;
+    int id;
+    float freq;
+    for (i=0; i<NUM_TASK_TYPES; i++) {
+        fscanf(fp, "%d %f", &id, &freq);
+        s->freqs[i] = freq;
+    }
+    return 0;
+}
+
+int printConfig(struct config * s) {
+    int c;
+    puts("\nCURRENT CONFIGURATION");
+    for (c=0; c<NUM_TASK_TYPES; c++) {
+        printf("TaskID: %d Frequency: %4.2f%%\n", c+1, s->freqs[c]);
+    }
+}
+
+// TODO: Implement saving and loading of config files
+// TODO: Finalize config file format
+// TODO: Change the way tasks are generated to take advantage of the current configuration
 int main(int argc, char * argv[])
 {
-    // Remove old data.txt, if necessary
-    if (fileCheck() == 1)
-    {
-        puts("\nOld test data file deleted.");
+    // Check for config file, create one if it doesn't exist
+    if (fileCheck("config.cfg") == 0) {
+        createDefConfig();
+        puts("Default config file created");
     }
 
+    // Load config file vals into current config
+    struct config current_config;
+    loadConfig(&current_config);
+
+    // Print menu to allow user to modify the current config
+    int menuChoice;
+    while (1) {
+        printConfig(&current_config);
+        puts("\n1: Save current config");
+        puts("2: Load another config");
+        puts("3: Reset config to default");
+        puts("4: Generate test data");
+        printf("\n>> ");
+        scanf("%d", &menuChoice);
+        if (menuChoice == 4) {
+            break;
+        }
+    }
+    
     // Stores total number of tasks to generate
     int numTasks = -1;
     if (argc == 2)
@@ -130,15 +189,30 @@ int main(int argc, char * argv[])
     }
 
     // Seed the rng
-    init_genrand(2947);
+    time_t now;
+    time(&now);
+    init_genrand((int)now);
+
+    // Remove old data.txt, if necessary
+    if (fileCheck("data.txt") == 1)
+    {
+        puts("\nOld test data file deleted.");
+    } 
 
     // Open the file for writing
     FILE *fp;
     fp = fopen("data.txt", "w");
 
-    // test
+    // generate the data
     int rc = generateData(fp, numTasks);
 
     fclose(fp);
+
+    char in;
+    printf("Start simulation on new test data? [Y/n] ");
+    scanf(" %c", &in);
+    if (in == 'Y' || in == 'y') {
+        puts("yep");
+    }
     return 0;
 }
