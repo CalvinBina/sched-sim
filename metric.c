@@ -7,41 +7,56 @@
 #include <limits.h>
 
 // Struct for a task
+// fields are listed in the same order
+// as the config.cfg file
 //
-typedef struct
+struct Task
 {
-    int Priority;           // lower is higher priority
+    int task_id;
     int ProcessingTime;     // in seconds
+    int start_time;
     int DueDateTime;        // seconds from start of execution
+    int Priority;           // lower is higher priority
+    int opp_times[10];      // even indexes are start opportunity times
+                            // odd indexes are end opportunity times
+
+
+    // These are used to store decision values for the respective 
+    // sorting methods
     double CriticalRatio;
     double SRO;
-    int task_id;
-    int start_time;
-    int opp_times[10];      // even indexes are start opportunity times
-} Task;                          // odd indexes are end opportunity times
+};
 
-// Critical Ratio-based scheduling
+// Critical Ratio-based scheduling - tasks with CR < 1 are behind schedule, CR > 1 ahead of schedule
 //
-void criticalRatio ( Task * eligible, Task * schedule, int num_tasks )
+void criticalRatio ( struct Task * eligible, struct Task * schedule, int num_tasks )
 {
     int currentTime = 0;
     int counter = 0;
     int lowestTaskIndx = 0;
     double lowestRatio = INT_MAX;
+    int i;
 
+    // counter keeps track of number of tasks that have been scheduled
     while (counter < num_tasks)
     {
-        lowestTaskIndx = 0;
+        // Every time we schedule a task, we reset the variables that keep track of the lowest Critical Ratio
+        lowestTaskIndx = -1;
         lowestRatio = INT_MAX;
-        int i;
+
+        // The for loop that runs through each task and determines which task (if any) to schedule next
         for ( i = 0; i < num_tasks; i++)
         {
+            // if the current time is not past the start_time of this job, we cannot schedule this task yet 
             if (eligible[i].start_time > currentTime) continue;
 
+            // Calculate CR (this value changes for each task as time goes on)
             eligible[i].CriticalRatio = (double)(eligible[i].DueDateTime - currentTime) / (double)eligible[i].ProcessingTime;
 
             if ( eligible[i].CriticalRatio < lowestRatio )
             {
+                // This is placeholder code for working with opportunity times
+                // TODO: Determine a method to incorporate opportunity windows for tasks - quite possibly up the priority of the task and work with higher priorities first
                 if (eligible[i].opp_times[1] != 0)
                 {
                     int bo;
@@ -54,23 +69,33 @@ void criticalRatio ( Task * eligible, Task * schedule, int num_tasks )
                             break;
                         }
                     }
-                } else
+                } else  // this will keep track of the lowest CR for this run through, and the task index
                 {
                     lowestRatio = eligible[i].CriticalRatio;
                     lowestTaskIndx = i;
                 }
             }
         }
+
+        // if no tasks are eligible this run through, but we still haven't scheduled all tasks, we need to increment the time to simulate passage of time
+        if (lowestTaskIndx == -1)
+        {
+            currentTime = currentTime + 20;
+            continue;
+        }
+        // otherwise, we update the current time to simulate real-time scheduling
         currentTime = currentTime + eligible[lowestTaskIndx].ProcessingTime;
         schedule[counter] = eligible[lowestTaskIndx];
         eligible[lowestTaskIndx].DueDateTime = INT_MAX;
         counter++;
     }
+
+    // calculate CR for all tasks that havent been scheduled yet, 
 }
 
 // Earliest Due Date-based scheduling
 //
-void edd ( Task * eligible, Task * schedule, int num_tasks )
+void edd ( struct Task * eligible, struct Task * schedule, int num_tasks )
 {
     int currentTime = 0;
     int counter = 0;
@@ -118,7 +143,7 @@ void edd ( Task * eligible, Task * schedule, int num_tasks )
 
 // First Come First Served-based scheduling
 // 
-void fcfs ( Task * eligible, Task * schedule, int num_tasks )
+void fcfs ( struct Task * eligible, struct Task * schedule, int num_tasks )
 {
     int currentTime = 0;
     int counter = 0;
@@ -156,7 +181,7 @@ void fcfs ( Task * eligible, Task * schedule, int num_tasks )
 
 // Shortest Processing Time-based scheduling
 //
-void spt ( Task * eligible, Task * schedule, int num_tasks )
+void spt ( struct Task * eligible, struct Task * schedule, int num_tasks )
 {
     int currentTime = 0;
     int shortestPtime = INT_MAX;
@@ -203,7 +228,7 @@ void spt ( Task * eligible, Task * schedule, int num_tasks )
 
 // Slack per remaining operations-based scheduling
 //
-void sro ( Task * eligible, Task * schedule, int num_tasks )
+void sro ( struct Task * eligible, struct Task * schedule, int num_tasks )
 {
     int currentTime = 0;
     int lowestSRO   = INT_MAX;
@@ -250,7 +275,38 @@ void sro ( Task * eligible, Task * schedule, int num_tasks )
         counter++;
     }
 }
-// TODO: fix file i/o errors
+
+// This function reads the data file and gets the task list to schedule
+//
+int readData (FILE * fp, struct Task * tasks) 
+{
+    int numLines = 0;
+    int c;
+    char line[512];
+    int temp_id;
+    int temp_proctime;
+    int temp_startTime;
+    int temp_duetime;
+    int temp_priority;
+    int temp_op[10];
+    while (!feof(fp)) {
+        if (fgets(line, 512, fp)==NULL) break;
+        sscanf(line, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d", &temp_id, &temp_proctime, &temp_startTime, &temp_duetime, &temp_priority, &temp_op[0], &temp_op[1], &temp_op[2], &temp_op[3], &temp_op[4], &temp_op[5], &temp_op[6], &temp_op[7], &temp_op[8], &temp_op[9]);
+        tasks[numLines].task_id = temp_id;
+        tasks[numLines].ProcessingTime = temp_proctime;
+        tasks[numLines].start_time = temp_startTime;
+        tasks[numLines].DueDateTime = temp_duetime;
+        tasks[numLines].Priority = temp_priority;
+        for (c=0; c<10; c++)
+        {
+            tasks[numLines].opp_times[c] = temp_op[c];
+        }
+        numLines++;
+    }
+    return numLines;
+}
+
+// TODO: Make flowchart diagrams of scheduling methods, and make adjustments to fine tune
 // Read in test data, run desired scheduling method on data,
 // and view the results of the test
 //
@@ -301,41 +357,17 @@ int main (int argc, char* argv[])
     //
     FILE *fp = NULL;
     fp = fopen(filename, "r");
-    int c;
-    int num_tasks = 0;
-    while ( (c = fgetc(fp)) != EOF)
-    {
-      if (c == '\n')
-      {
-          num_tasks++;
-      }
-    }
-    fclose(fp);
-
-    // Create task arrays
-    //
-    Task eligibleTasks[num_tasks];
-    //Task      allTasks[num_tasks];
-    Task  taskSchedule[num_tasks];
+    struct Task tasks[100];
+    struct Task taskSchedule[100];
+    int numtasks = readData(fp, tasks);
 
     // Open file and parse tasks
     //
-    fp = fopen(filename, "r");
-    int counter = 0;
-    while ( counter < num_tasks)
-    {
-        fscanf(fp, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\r\n",
-              &eligibleTasks[counter].task_id, &eligibleTasks[counter].ProcessingTime, &eligibleTasks[counter].start_time, &eligibleTasks[counter].DueDateTime, &eligibleTasks[counter].Priority, &eligibleTasks[counter].opp_times[0], &eligibleTasks[counter].opp_times[1], &eligibleTasks[counter].opp_times[2], &eligibleTasks[counter].opp_times[3], &eligibleTasks[counter].opp_times[4], &eligibleTasks[counter].opp_times[5], &eligibleTasks[counter].opp_times[6], &eligibleTasks[counter].opp_times[7], &eligibleTasks[counter].opp_times[8], &eligibleTasks[counter].opp_times[9]);
-        counter++;
-        // test
-        printf("READ ID: %d\n", eligibleTasks[counter].task_id);
-    }
-    fclose(fp);
 
 //TODO: Implement task filter
     //Filter eligible jobs
-    //filterTasks ( allTasks, eligibleTasks );
-    //scheduler ( eligibleTasks, taskSchedule );
+    //filterTasks ( allTasks, taskSchedule );
+    //scheduler ( taskSchedule, taskSchedule );
 
     //startTime = clock();
     //
@@ -345,26 +377,26 @@ int main (int argc, char* argv[])
 
     if (sched_choice == 1)
     {
-        fcfs(eligibleTasks, taskSchedule, num_tasks);
+        fcfs(tasks, taskSchedule, numtasks);
     } else if (sched_choice == 2)
     {
-        spt(eligibleTasks, taskSchedule, num_tasks);
+        spt(tasks, taskSchedule, numtasks);
     } else if (sched_choice == 3)
     {
-        edd(eligibleTasks, taskSchedule, num_tasks);
+        edd(tasks, taskSchedule, numtasks);
     } else if (sched_choice == 4)
     {
-        criticalRatio(eligibleTasks, taskSchedule, num_tasks);
+        criticalRatio(tasks, taskSchedule, numtasks);
     } else if (sched_choice == 5)
     {
-        sro(eligibleTasks, taskSchedule, num_tasks);
+        sro(tasks, taskSchedule, numtasks);
     }
 
     // Run through scheduled list, measure performance
     int i;
-    for ( i = 0; i < num_tasks; i++ )
+    for ( i = 0; i < numtasks; i++ )
     {
-        printf("TASKID: %d\n", taskSchedule[i].task_id);
+        printf("TASKID sorted: %d\n", taskSchedule[i].task_id);
         totalProcTime = taskSchedule[i].ProcessingTime + totalProcTime;
         flowTime      = flowTime + taskSchedule[i].ProcessingTime;
         totalFlowTime = flowTime + totalFlowTime;
@@ -384,10 +416,10 @@ int main (int argc, char* argv[])
     double AvgJobDelays = 0.0;
 
     // Calculate performance
-    AvgFinishTime = (double)totalFlowTime / (double)num_tasks;
+    AvgFinishTime = (double)totalFlowTime / (double)numtasks;
     Utilization   = (double)totalProcTime / (double)totalFlowTime;
     AvgNumOfTasks = (double)totalFlowTime / (double)totalProcTime;
-    AvgJobDelays  = (double)totalDelay    / (double)num_tasks;
+    AvgJobDelays  = (double)totalDelay    / (double)numtasks;
 
     // Display results
     printf ("\n\nRESULTS\n------------\n"

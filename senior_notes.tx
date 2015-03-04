@@ -1,0 +1,21 @@
+SLIDES
+
+project goals - once our CubeSat launches later this semester, we will be uploading tasks for the satellite.
+                it would be best if the ground control team did not have to schedule the tasks themselves
+                - this could take a lot of time, depending on the number of tasks. You would have to take into account
+                the orbit path of the satellite, when it would be there, also maintenance tasks
+                - why not just let the satellite figure out its own shit?
+                
+project setbacks - towards the end
+Current State
+have UML diagrams of satellite and ground comms
+activity diagram of scheduler - what decisions get made where to affect the ordering of the results
+document testing process: generation, simulation, what the results mean, key factors affecting the results
+show code - briefly
+do a demo
+
+include future projects:
+    create batch generation of many data files with one or more configuration files
+    create batch simulation of many data files
+    upload results of batch simulations to a database
+    once enough data is in the database, create graphs and such to visualize the results for easier analyzation 

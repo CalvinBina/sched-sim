@@ -21,6 +21,7 @@
 
 #define NUM_TASK_TYPES 8
 
+// Local configs
 struct config {
     float freqs[NUM_TASK_TYPES];
 };
@@ -91,17 +92,43 @@ int getTaskPriority(int t)
 
 // This will populate the given file
 //
-int generateData(FILE * fp, int numtasks)
+int generateData(FILE * fp, int numtasks, struct config * s)
 {
     int c;
     int randID;
+    int randNum;
     int taskDur;
     int startT;
     int dueT;
     int taskPriority;
+    float upperBounds[8];
+    float lastBound = 0;
+    for (c=0; c<NUM_TASK_TYPES; c++) {
+        lastBound = lastBound + s->freqs[c] * 100;
+        upperBounds[c] = lastBound;
+        // test
+        printf("Rand Up bound task %d:  %f\n", c+1, upperBounds[c]);
+    }
     for (c=0; c<numtasks; c++)
     {
-        randID  = (genrand_int32() % 8) + 1;
+        randNum = (genrand_int32() % 10000);
+        if (randNum < upperBounds[0]) {
+            randID = 1;
+        } else if (randNum < upperBounds[1]) {
+            randID = 2;
+        } else if (randNum < upperBounds[2]) {
+            randID = 3;
+        } else if (randNum < upperBounds[3]) {
+            randID = 4;
+        } else if (randNum < upperBounds[4]) {
+            randID = 5;
+        } else if (randNum < upperBounds[5]) {
+            randID = 6;
+        } else if (randNum < upperBounds[6]) {
+            randID = 7;
+        } else if (randNum < upperBounds[7]) {
+            randID = 8;
+        }
         taskDur = getTaskDuration(randID);
         startT  = genrand_int32() % ((c+1) * 180);
         dueT = -1;
@@ -126,9 +153,27 @@ int createDefConfig()
     return 0;
 }
 
-int loadConfig(struct config * s) {
+// Saves a config file
+int saveConfig(struct config * s)
+{
     FILE *fp;
-    fp = fopen("config.cfg", "r");
+    char fname[20];
+    printf("Enter a filename >> ");
+    scanf("%s", fname);
+    fp = fopen(fname, "w");
+    int c;
+    for (c=0; c<NUM_TASK_TYPES; c++) {
+        fprintf(fp, "%d %f\n", c+1, s->freqs[c]);
+    }
+    fclose(fp);
+    return 0;
+}
+
+// Load a config file
+int loadConfig(struct config * s, char str[])
+{
+    FILE *fp;
+    fp = fopen(str, "r");
     int i;
     int id;
     float freq;
@@ -136,10 +181,13 @@ int loadConfig(struct config * s) {
         fscanf(fp, "%d %f", &id, &freq);
         s->freqs[i] = freq;
     }
+    fclose(fp);
     return 0;
 }
 
-int printConfig(struct config * s) {
+// Prints the current configuration loaded
+int printConfig(struct config * s)
+{
     int c;
     puts("\nCURRENT CONFIGURATION");
     for (c=0; c<NUM_TASK_TYPES; c++) {
@@ -147,9 +195,32 @@ int printConfig(struct config * s) {
     }
 }
 
-// TODO: Implement saving and loading of config files
+// Modify the current configuration
+int modifyConfig(struct config * s)
+{
+    puts("Enter the new percentages for each task ID.\nEx: ID 1 >> 10.3");
+    printf("ID 1 >> ");
+    scanf("%f", &s->freqs[0]);
+    printf("ID 2 >> ");
+    scanf("%f", &s->freqs[1]);
+    printf("ID 3 >> ");
+    scanf("%f", &s->freqs[2]);
+    printf("ID 4 >> ");
+    scanf("%f", &s->freqs[3]);
+    printf("ID 5 >> ");
+    scanf("%f", &s->freqs[4]);
+    printf("ID 6 >> ");
+    scanf("%f", &s->freqs[5]);
+    printf("ID 7 >> ");
+    scanf("%f", &s->freqs[6]);
+    printf("ID 8 >> ");
+    scanf("%f", &s->freqs[7]);
+    return 0;
+}
+
 // TODO: Finalize config file format
-// TODO: Change the way tasks are generated to take advantage of the current configuration
+// TODO: Add starting time offset, which would allow a user to specify schedules with optimal solutions - no conflicts in timing
+// vs conflicts in timing, with the latter resulting in a more difficult job for a scheduler
 int main(int argc, char * argv[])
 {
     // Check for config file, create one if it doesn't exist
@@ -160,20 +231,33 @@ int main(int argc, char * argv[])
 
     // Load config file vals into current config
     struct config current_config;
-    loadConfig(&current_config);
+    loadConfig(&current_config, "config.cfg");
 
     // Print menu to allow user to modify the current config
     int menuChoice;
     while (1) {
         printConfig(&current_config);
-        puts("\n1: Save current config");
+        puts("");
+        puts("1: Save current config");
         puts("2: Load another config");
         puts("3: Reset config to default");
         puts("4: Generate test data");
+        puts("5: Modify current configuration");
         printf("\n>> ");
         scanf("%d", &menuChoice);
         if (menuChoice == 4) {
             break;
+        } else if (menuChoice == 1) {
+            saveConfig(&current_config);
+        } else if (menuChoice == 2) {
+            char fname[20];
+            printf("Enter a file name >> ");
+            scanf("%s", fname);
+            loadConfig(&current_config, fname);
+        } else if (menuChoice == 3) {
+            createDefConfig();
+        } else if (menuChoice == 5) {
+            modifyConfig(&current_config);
         }
     }
     
@@ -204,7 +288,7 @@ int main(int argc, char * argv[])
     fp = fopen("data.txt", "w");
 
     // generate the data
-    int rc = generateData(fp, numTasks);
+    int rc = generateData(fp, numTasks, &current_config);
 
     fclose(fp);
 
@@ -212,7 +296,7 @@ int main(int argc, char * argv[])
     printf("Start simulation on new test data? [Y/n] ");
     scanf(" %c", &in);
     if (in == 'Y' || in == 'y') {
-        puts("yep");
+        system("./sim data.txt");
     }
     return 0;
 }
