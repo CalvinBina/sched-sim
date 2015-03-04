@@ -106,8 +106,6 @@ int generateData(FILE * fp, int numtasks, struct config * s)
     for (c=0; c<NUM_TASK_TYPES; c++) {
         lastBound = lastBound + s->freqs[c] * 100;
         upperBounds[c] = lastBound;
-        // test
-        printf("Rand Up bound task %d:  %f\n", c+1, upperBounds[c]);
     }
     for (c=0; c<numtasks; c++)
     {

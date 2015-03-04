@@ -37,6 +37,12 @@ void criticalRatio ( struct Task * eligible, struct Task * schedule, int num_tas
     double lowestRatio = INT_MAX;
     int i;
 
+    // test 
+    int n;
+    for (n=0; n<num_tasks; n++)
+    {
+        printf("SENT IN: %d\n", eligible[n].task_id);
+    }
     // counter keeps track of number of tasks that have been scheduled
     while (counter < num_tasks)
     {
@@ -49,6 +55,8 @@ void criticalRatio ( struct Task * eligible, struct Task * schedule, int num_tas
         {
             // if the current time is not past the start_time of this job, we cannot schedule this task yet 
             if (eligible[i].start_time > currentTime) continue;
+
+            if (eligible[i].DueDateTime == INT_MAX) continue;
 
             // Calculate CR (this value changes for each task as time goes on)
             eligible[i].CriticalRatio = (double)(eligible[i].DueDateTime - currentTime) / (double)eligible[i].ProcessingTime;
