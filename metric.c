@@ -43,6 +43,7 @@ void criticalRatio ( struct Task * eligible, struct Task * schedule, int num_tas
     {
         printf("SENT IN: %d\n", eligible[n].task_id);
     }
+
     // counter keeps track of number of tasks that have been scheduled
     while (counter < num_tasks)
     {
@@ -110,10 +111,17 @@ void edd ( struct Task * eligible, struct Task * schedule, int num_tasks )
     int eddTime = INT_MAX;
     int eddIndx = 0;
     
+    // test 
+    int n;
+    for (n=0; n<num_tasks; n++)
+    {
+        printf("SENT IN: %d\n", eligible[n].task_id);
+    }
+
     while (counter < num_tasks)
     {
         eddTime = INT_MAX;
-        eddIndx = 0;
+        eddIndx = -1;
 
         int i;
         for ( i=0; i<num_tasks; i++)
@@ -142,6 +150,11 @@ void edd ( struct Task * eligible, struct Task * schedule, int num_tasks )
             }
         }
 
+        if (eddIndx == -1) {
+            currentTime = currentTime + 20;
+            continue;
+        }
+
         schedule[counter] = eligible[eddIndx];
         currentTime = currentTime + eligible[eddIndx].ProcessingTime;
         eligible[eddIndx].DueDateTime    = INT_MAX;
@@ -156,6 +169,14 @@ void fcfs ( struct Task * eligible, struct Task * schedule, int num_tasks )
     int currentTime = 0;
     int counter = 0;
     int i;
+    
+    // test 
+    int n;
+    for (n=0; n<num_tasks; n++)
+    {
+        printf("SENT IN: %d\n", eligible[n].task_id);
+    }
+
     while ( counter < num_tasks )
     {
         for (i=0; i < num_tasks; i++)
@@ -184,6 +205,7 @@ void fcfs ( struct Task * eligible, struct Task * schedule, int num_tasks )
                 counter++;
             }
         }
+        currentTime = currentTime + 20;
     }
 }
 
@@ -196,10 +218,17 @@ void spt ( struct Task * eligible, struct Task * schedule, int num_tasks )
     int sptIndx = 0;
     int counter = 0;
 
+    // test 
+    int n;
+    for (n=0; n<num_tasks; n++)
+    {
+        printf("SENT IN: %d\n", eligible[n].task_id);
+    }
+
     while (counter < num_tasks)
     {
         shortestPtime = INT_MAX;
-        sptIndx = 0;
+        sptIndx = -1;
 
         int i;
         for ( i=0; i < num_tasks; i++)
@@ -227,6 +256,12 @@ void spt ( struct Task * eligible, struct Task * schedule, int num_tasks )
                 }
             }
         }
+
+        if (sptIndx == -1) {
+            currentTime = currentTime + 20;
+            continue;
+        }
+
         schedule[counter] = eligible[sptIndx];
         currentTime = currentTime + eligible[sptIndx].ProcessingTime;
         eligible[sptIndx].ProcessingTime = INT_MAX;
@@ -243,9 +278,16 @@ void sro ( struct Task * eligible, struct Task * schedule, int num_tasks )
     int lowestIndx  = 0;
     int counter = 0;
 
+    // test 
+    int n;
+    for (n=0; n<num_tasks; n++)
+    {
+        printf("SENT IN: %d\n", eligible[n].task_id);
+    }
+
     while (counter < num_tasks)
     {
-        lowestIndx = 0;
+        lowestIndx = -1;
         lowestSRO = INT_MAX;
 
         int i;
@@ -276,6 +318,12 @@ void sro ( struct Task * eligible, struct Task * schedule, int num_tasks )
                 }
             }
         }
+
+        if (lowestIndx == -1) {
+            currentTime = currentTime + 20;
+            continue;
+        }
+
         currentTime = currentTime + eligible[lowestIndx].ProcessingTime;
         schedule[counter] = eligible[lowestIndx];
         eligible[lowestIndx].DueDateTime = INT_MAX;
