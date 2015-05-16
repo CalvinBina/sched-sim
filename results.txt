@@ -1,0 +1,166 @@
+
+===================================================
+RUN A
+200 tasks
+______________
+
+1 for no start conflict, 1 for no due conflict
+----------------------------------------------
+FCFS
+-----
+Average Finish Time: 5886.300000
+        Utilization: 0.008014
+ Average # of Tasks: 124.789061
+  Average Job Delay: 299.690000
+SPT
+-----
+Average Finish Time: 1667.160000
+        Utilization: 0.013847
+ Average # of Tasks: 72.218324
+  Average Job Delay: 23.645000
+EDD
+----
+Average Finish Time: 2365.900000
+        Utilization: 0.011659
+ Average # of Tasks: 85.767627
+  Average Job Delay: 15.470000
+CR
+----
+Average Finish Time: 2325.780000
+        Utilization: 0.010661
+ Average # of Tasks: 93.800363
+  Average Job Delay: 4.205000
+SRO
+----
+Average Finish Time: 1763.870000
+        Utilization: 0.013371
+ Average # of Tasks: 74.787789
+  Average Job Delay: 0.000000
+----------------------------------------------
+
+1 for no start conflict, 2 for due conflict
+----------------------------------------------
+FCFS
+-----
+Average Finish Time: 9040.010000
+        Utilization: 0.009783
+ Average # of Tasks: 102.216305
+  Average Job Delay: 2997.775000
+SPT
+----
+Average Finish Time: 2226.080000
+        Utilization: 0.019640
+ Average # of Tasks: 50.916743
+  Average Job Delay: -32.595000
+EDD
+----
+Average Finish Time: 2760.505000
+        Utilization: 0.017106
+ Average # of Tasks: 58.460504
+  Average Job Delay: 68.295000
+CR
+----
+Average Finish Time: 3005.690000
+        Utilization: 0.015153
+ Average # of Tasks: 65.993852
+  Average Job Delay: 76.860000
+SRO
+----
+Average Finish Time: 2309.160000
+        Utilization: 0.019150
+ Average # of Tasks: 52.219810
+  Average Job Delay: 0.235000
+----------------------------------------------
+
+2 for start conflict, 1 for no due conflict
+----------------------------------------------
+FCFS
+-----
+Average Finish Time: 9241.110000
+        Utilization: 0.008659
+ Average # of Tasks: 115.485004
+  Average Job Delay: 514.280000
+SPT
+----
+Average Finish Time: 2502.760000
+        Utilization: 0.015787
+ Average # of Tasks: 63.344976
+  Average Job Delay: -20.645000
+EDD
+----
+Average Finish Time: 2921.055000
+        Utilization: 0.014382
+ Average # of Tasks: 69.532373
+  Average Job Delay: 9.400000
+CR
+----
+Average Finish Time: 3717.370000
+        Utilization: 0.011199
+ Average # of Tasks: 89.295460
+  Average Job Delay: 23.540000
+SRO
+----
+Average Finish Time: 2620.065000
+        Utilization: 0.015271
+ Average # of Tasks: 65.485254
+  Average Job Delay: 0.000000
+----------------------------------------------
+
+2 for start conflict, 2 for due conflict
+----------------------------------------------
+FCFS
+-----
+Average Finish Time: 8120.140000
+        Utilization: 0.011422
+ Average # of Tasks: 87.548679
+  Average Job Delay: 3464.515000
+SPT
+----
+Average Finish Time: 1627.590000
+        Utilization: 0.028186
+ Average # of Tasks: 35.478801
+  Average Job Delay: -37.095000
+EDD
+----
+Average Finish Time: 2192.820000
+        Utilization: 0.022517
+ Average # of Tasks: 44.411544
+  Average Job Delay: 40.310000
+CR
+---
+Average Finish Time: 2703.030000
+        Utilization: 0.017649
+ Average # of Tasks: 56.661356
+  Average Job Delay: 181.920000
+SRO
+----
+Average Finish Time: 1741.295000
+        Utilization: 0.026632
+ Average # of Tasks: 37.548140
+  Average Job Delay: 0.330000
+----------------------------------------------
+
+===================================================
+===================================================
+
+RUN C
+5000 tasks
+______________
+
+1 for no start conflict, 1 for no due conflict
+----------------------------------------------
+----------------------------------------------
+
+1 for no start conflict, 2 for due conflict
+----------------------------------------------
+----------------------------------------------
+
+2 for start conflict, 1 for no due conflict
+----------------------------------------------
+----------------------------------------------
+
+2 for start conflict, 2 for due conflict
+----------------------------------------------
+----------------------------------------------
+
+===================================================

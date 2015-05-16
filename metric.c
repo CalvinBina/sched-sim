@@ -181,7 +181,11 @@ void fcfs ( struct Task * eligible, struct Task * schedule, int num_tasks )
     {
         for (i=0; i < num_tasks; i++)
         {
-            if ( eligible[i].start_time > currentTime ) continue;
+            if ( eligible[i].start_time > currentTime ) {
+                currentTime = currentTime + 20;
+                i = i - 1;
+                continue;
+            }
 
             if (eligible[i].opp_times[1] != 0)
             {
@@ -205,7 +209,6 @@ void fcfs ( struct Task * eligible, struct Task * schedule, int num_tasks )
                 counter++;
             }
         }
-        currentTime = currentTime + 20;
     }
 }
 
